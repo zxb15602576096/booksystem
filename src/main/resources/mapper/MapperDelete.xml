@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.booksystem.mapper.Mapperdelete">
+<!--    删除一个用户-->
+    <delete id="deleteuser" parameterType="list">
+        delete from user
+        <if test="list!=null and list.size>0">
+            <foreach collection="list" item="ids" open=" where id in (" close=")" separator=",">
+                #{ids}
+            </foreach>
+        </if>
+    </delete>
+<!--删除书籍信息-->
+    <delete id="deletebook" parameterType="list">
+        delete from book
+        <if test="list!=null and list.size>0">
+            <foreach collection="list" item="bookids" open=" where bookid in (" close=")" separator=",">
+                #{bookids}
+            </foreach>
+        </if>
+    </delete>
+<!--删除借阅信息-->
+    <delete id="deleteborrowbyborrowid" parameterType="list">
+        delete from borrow
+        <if test="list!=null and list.size>0">
+            <foreach collection="list" item="borrowids" open=" where borrowid in (" close=")" separator=",">
+                #{borrowids}
+            </foreach>
+        </if>
+    </delete>
+    <delete id="deleteborrowbybookid" parameterType="list">
+        delete from borrow
+        <if test="list!=null and list.size>0">
+            <foreach collection="list" item="bookids" open=" where borrow.bookid in (" close=")" separator=",">
+                #{bookids}
+            </foreach>
+        </if>
+    </delete>
+    <delete id="deleteborrowbyuserid" parameterType="list">
+        delete from borrow
+        <if test="list!=null and list.size>0">
+            <foreach collection="list" item="ids" open=" where borrow.id in (" close=")" separator=",">
+                #{ids}
+            </foreach>
+        </if>
+    </delete>
+
+</mapper>

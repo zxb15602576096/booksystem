@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>图书管理系统</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="Badge Sign In Form template Responsive, Login form web template,Flat Pricing tables,Flat Drop downs  Sign up Web Templates, Flat Web Templates, Login sign up Responsive web template, SmartPhone Compatible web template, free WebDesigns for Nokia, Samsung, LG, SonyEricsson, Motorola web design" />
+
+<!-- Custom Theme files -->
+<link href="css/style.css" rel="stylesheet" type="text/css" media="all" />
+<!-- //Custom Theme files -->
+	<script type="text/javascript" src="js/jquery-3.4.1.min.js"></script>
+	<script>
+		$(document).ready(function () {
+			sessionStorage.removeItem('username'); //把session删除
+			$("#button").click(function () {
+				var username=$("input[name='username']").val();
+				var password=$("input[name='password']").val();
+				console.log(username);
+				console.log(password);
+				if (username!=''&&password!='') {
+					$.ajax({
+						type: 'post',
+						// 前面的key,value,key2,value2不要加""
+						data: {key: "username", value: username, key2: "password", value2: password},
+						url: '/login',
+						dataType: 'json',
+						success: function (data) {
+							// alert(typeof data);//输出变量的类型
+							switch (data) {
+								case 1 :
+									sessionStorage.setItem('username', username);  //把username设在session中
+									window.location.href = "superAdministrator/superAdministrator.html";
+									break;  //跳到管理员界面
+								case 2 :
+									sessionStorage.setItem('username', username);  //把username设在session中
+									window.location.href = "bookAdministrator/bookAdministrator.html";
+									break;  //跳到图书管理员界面
+								case 3 :
+									sessionStorage.setItem('username', username);  //把username设在session中
+									window.location.href = "reader/reader.html";
+									break;  //跳到读者界面
+								default :alert("账号或者密码错误！"); break;
+							}
+						},
+						error: function (e) {
+							alert("账号或者密码错误！");
+						}
+					});
+				}
+			});
+
+			$("#button2").click(function () {
+				window.location.href="register.html";
+			});
+		});
+	</script>
+</head>
+<body>
+	<!-- main -->
+	<div class="main"> 
+		<h1>图书管理系统</h1>
+		<div class="login-form"> 
+			<h2>SignIn Form</h2> 
+			<div class="agileits-top">
+				<div action="#" method="post">
+					<div class="styled-input">
+						<input type="text" name="username" required=""/>
+						<label>账号</label>
+						<span></span>
+					</div>
+					<div class="styled-input">
+						<input type="password" name="password" required="">
+						<label>密码</label>
+						<span></span>
+					</div> 
+					<div class="wthree-text"> 
+						<ul> 
+							<li>
+							<li> <a href="register.html">注册</a> </li>
+							</li>
+							<li> <a href="findpassword.html">忘记密码</a> </li>
+						</ul>
+						<div class="clear"> </div>
+					</div>  
+				</div>
+			</div>
+			<div class="agileits-bottom">
+				<input id="button" type="submit" value="登录">
+			</div>	
+		</div>	
+	</div>
+</body>
+</html>

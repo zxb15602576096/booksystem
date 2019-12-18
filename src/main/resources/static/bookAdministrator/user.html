@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">-->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css">
+    <title>用户信息</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>-->
+<script src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table-locale-all.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/export/bootstrap-table-export.min.js"></script>
+<body>
+<div>
+    <button id="remove" class="btn btn-danger" disabled>
+        <i class="glyphicon glyphicon-remove"></i> 删除
+    </button>
+    <button class="btn btn-success" data-toggle="modal" data-target="#myModal">
+        <i class="glyphicon glyphicon-inbox"></i> 添加
+    </button>
+    <table
+            id="table"
+            data-toolbar="#toolbar"
+            data-search="true"
+            data-show-refresh="true"
+            data-show-toggle="true"
+            data-show-fullscreen="false"
+            data-show-columns="true"
+            data-show-columns-toggle-all="true"
+            data-detail-view="false"
+            data-show-export="true"
+            data-click-to-select="false"
+            data-detail-formatter="detailFormatter"
+            data-minimum-count-columns="2"
+            data-show-pagination-switch="false"
+            data-pagination="false"
+            data-id-field="id"
+            data-page-list="[10, 20,all]"
+            data-show-footer="false"
+            data-side-pagination="server"
+            data-url="/selectoneuser?key=jurisdiction&value=3"
+            data-toggle="table" data-locale="zh-CN"
+            data-response-handler="responseHandler">
+    </table>
+</div>
+<!-- Modal 添加按钮的框 -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">添加用户信息</h4>
+            </div>
+            <div class="modal-body">
+<!--                账号输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon1">账号</span>
+                    <input type="text" id="username" class="form-control" placeholder="请输入账号" aria-describedby="sizing-addon1" required>
+                </div>
+<!--                名字输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2">名字</span>
+                    <input type="text" id="name" class="form-control" placeholder="请输入名字" aria-describedby="sizing-addon2" required>
+                </div>
+<!--            班级输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon3">班级</span>
+                    <input type="text" id="userclass" class="form-control" placeholder="请输入班级" aria-describedby="sizing-addon3">
+                </div>
+                <!--                性别输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon4">性别</span>
+<!--                    <input type="text" id="gender" class="form-control" placeholder="请输入性别" aria-describedby="sizing-addon4" required>-->
+                    <select id="gender" class="selectpicker form-control">
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <!--                电话输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon5">电话</span>
+                    <input type="text" id="telephone" class="form-control" placeholder="请输入电话" aria-describedby="sizing-addon5" required>
+                </div>
+                <!--                电话输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon6">院系</span>
+                    <input type="text" id="department" class="form-control" placeholder="请输入院系" aria-describedby="sizing-addon6" required>
+                </div>
+                <!--                邮箱输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon1-8">邮箱</span>
+                    <input type="text" id="email" class="form-control" placeholder="请输入邮箱" aria-describedby="sizing-addon1-8" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="insert" type="button" class="btn btn-primary" data-dismiss="modal" >添加</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--修改的框-->
+<div class="modal fade" id="myModa2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabe2">修改用户信息</h4>
+            </div>
+            <div class="modal-body">
+<!--                账号输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-1">账号</span>
+                    <input type="text" id="updateusername" class="form-control" placeholder="请输入账号" aria-describedby="sizing-addon2-1" required>
+                </div>
+<!--                名字输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-2">名字</span>
+                    <input type="text" id="updatename" class="form-control" placeholder="请输入名字" aria-describedby="sizing-addon2-2" required>
+                </div>
+<!--            班级输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-3">班级</span>
+                    <input type="text" id="updateuserclass" class="form-control" placeholder="请输入班级" aria-describedby="sizing-addon2-3">
+                </div>
+                <!--                性别输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-4">性别</span>
+<!--                    <input type="text" id="updategender" class="form-control" placeholder="请输入性别" aria-describedby="sizing-addon2-4" required>-->
+                    <select id="updategender" class="selectpicker form-control">
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <!--                电话输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-5">电话</span>
+                    <input type="text" id="updatetelephone" class="form-control" placeholder="请输入电话" aria-describedby="sizing-addon2-5" required>
+                </div>
+                <!--                院系输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-6">院系</span>
+                    <input type="text" id="updatedepartment" class="form-control" placeholder="请输入院系" aria-describedby="sizing-addon2-6" required>
+                </div>
+                <!--                邮箱输入-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-8">邮箱</span>
+                    <input type="text" id="updateemail" class="form-control" placeholder="请输入邮箱" aria-describedby="sizing-addon2-8" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="update" type="button" class="btn btn-primary" data-dismiss="modal" >修改</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+
+<script>
+    //元素选择
+    var $table = $('#table')//表格
+    var $remove = $('#remove')//删除按钮
+    var $insert = $('#insert')//添加按钮
+    var $update = $('#update')//修改按钮
+    var selections = []//节点
+
+    //获取节点id
+    function getIdSelections() {
+        return $.map($table.bootstrapTable('getSelections'), function (row) {
+            return row.id
+        })
+    }
+
+    function responseHandler(res) {
+        $.each(res.rows, function (i, row) {
+            row.state = $.inArray(row.id, selections) !== -1
+        })
+        return res
+    }
+
+    function detailFormatter(index, row) {
+        var html = []
+        $.each(row, function (key, value) {
+            html.push('<p><b>' + key + ':</b> ' + value + '</p>')
+        })
+        return html.join('')
+    }
+
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a class="like" href="javascript:void(0)" title="Like">',
+            '<i class="fa fa-heart"></i>',
+            '</a> ',
+            '<a class="remove" href="javascript:void(0)" title="Remove">',
+            '<i class="fa fa-trash"></i>',
+            '</a>'
+        ].join('')
+    }
+
+    window.operateEvents = {
+        'click .like': function (e, value, row, index) {
+            alert('You click like action, row: ' + JSON.stringify(row))
+        },
+        'click .remove': function (e, value, row, index) {
+            $table.bootstrapTable('remove', {
+                field: 'id',
+                values: [row.id]
+            })
+        }
+    };
+
+    function totalTextFormatter(data) {
+        return 'Total'
+    }
+
+    function totalNameFormatter(data) {
+        return data.length
+    }
+
+    function totalPriceFormatter(data) {
+        var field = this.field
+        return '$' + data.map(function (row) {
+            return +row[field].substring(1)
+        }).reduce(function (sum, i) {
+            return sum + i
+        }, 0)
+    }
+
+    //初始化表格
+    function initTable() {
+
+        $table.bootstrapTable('destroy').bootstrapTable({
+            height: 550,
+            locale: $('#locale').val(),
+            columns: [
+                [{
+                    field: 'state',
+                    checkbox: true,
+                    rowspan: 2,
+                    align: 'center',
+                    valign: 'middle'
+                },{
+                    title: '用户信息',
+                    colspan: 8,
+                    align: 'center'
+                }],
+                [{
+                    title: '用户id',
+                    field: 'id'
+                },{
+                    field: 'name',
+                    title: '姓名'
+                }, {
+                    field: 'userclass',
+                    title: '班级'
+                }, {
+                    field: 'gender',
+                    title: '性别'
+                }, {
+                    field: 'telephone',
+                    title: '电话'
+                }, {
+                    field: 'department',
+                    title: '院系'
+                }, {
+                    field: 'jurisdiction',
+                    title: '权限'
+                }, {
+                    field: 'email',
+                    title: '邮箱'
+                }]
+            ]
+        });
+        $table.on('check.bs.table uncheck.bs.table ' +
+            'check-all.bs.table uncheck-all.bs.table',
+            function () {
+                $remove.prop('disabled', !$table.bootstrapTable('getSelections').length)
+
+                // save your data, here just save the current page
+                selections = getIdSelections()
+                // push or splice the selections if you want to save all data selections
+            })
+        $table.on('all.bs.table', function (e, name, args) {
+            console.log(name, args)
+        })
+        //点击行元素产生的事件
+        $table.on('click-row.bs.table',function (row, $element, field) {
+            console.log(row, $element, field);
+        })
+        //点击删除按钮的操作
+        $remove.click(function () {
+            var ids = getIdSelections();
+            $table.bootstrapTable('remove', {
+                field: 'id',
+                values: ids
+            });
+            $remove.prop('disabled', true);
+            var _ids=[];
+            for (var i=0;i<ids.length;i++)
+            {
+                _ids[i]=ids[i];
+            }
+            $.ajax({
+                type:'post',
+                data:"ids="+_ids,      //传递list数组
+                url:'/deleteuser',
+                success:function () {},
+                error:function () {alert("错误！");}
+            });
+        });
+        //点击添加按钮操作
+        $insert.click(function () {
+            var username=$("#username").val();
+            var name=$("#name").val();
+            var userclass=$("#userclass").val();
+            var gender=$("#gender").val();
+            var telephone=$("#telephone").val();
+            var department=$("#department").val();
+            var email=$("#email").val();
+            if (username==''||name==''||userclass==''||gender==''||telephone==''||department==''||email==''){
+                alert("输入内容不完整！");
+            }
+            else {
+                $.ajax({
+                    type:'post',
+                    data:{id:username,
+                        username:username,
+                        password:username,
+                        name:name,
+                        userclass:userclass,
+                        gender:gender,
+                        telephone:telephone,
+                        department:department,
+                        jurisdiction:3,
+                        email:email},
+                    url:'/insertuser',
+                    dataType:'json',
+                    success:function (data) {},
+                    error:function () {}
+                });
+            }
+        });
+
+        //点击修改按钮操作
+        $update.click(function () {
+            var username=$("#updateusername").val();
+            var name=$("#updatename").val();
+            var userclass=$("#updateuserclass").val();
+            var gender=$("#updategender").val();
+            var telephone=$("#updatetelephone").val();
+            var department=$("#updatedepartment").val();
+            var email=$("#updateemail").val();
+            if (username==''||name==''||userclass==''||gender==''||telephone==''||department==''||email==''){
+                alert("输入内容不完整！");
+            }
+            else {
+                $.ajax({
+                    type:'post',
+                    data:{id:username,
+                        username:username,
+                        password:null,
+                        name:name,
+                        userclass:userclass,
+                        gender:gender,
+                        telephone:telephone,
+                        department:department,
+                        jurisdiction:3,
+                        email:email},
+                    url:'/updateuser',
+                    dataType:'json',
+                });
+            }
+        });
+    }
+
+    $(function() {
+        initTable()
+        $('#locale').change(initTable)
+    });
+
+    // 判断账号是否重复
+    $("#username").blur(function () {                   //input框失去焦点判断
+        var username = $("#username").val();
+        if (username !=null&&username!='') {
+            $.ajax({
+                type: 'post',
+                data: {key: "username", value: username},
+                url: '/selectoneuser',
+                dataType: 'json',
+                success: function (data) {
+                    //alert(JSON.stringify(data));
+                    // data.length判断数组长度
+                    if (data.length!=0) {
+                        alert("账号重复，请重新输入！");
+                    }
+                }
+            });
+        }
+    });
+    var oldusername=null;
+    //双击单行修改操作
+    $("#table").on("dblclick", "tr", function () {
+        var td = $(this).find("td");
+        //声明并取到当前行值
+        $("#updateusername").val(td.eq(1).text());
+        $("#updatename").val(td.eq(2).text());
+        $("#updateuserclass").val(td.eq(3).text());
+        $("#updategender").val(td.eq(4).text());
+        $("#updatetelephone").val(td.eq(5).text());
+        $("#updatedepartment").val(td.eq(6).text());
+        $(" #updateemail").val(td.eq(8).text());
+        oldusername=$("#updateusername").val();
+        //触发修改的模态框
+        $('#myModa2').modal();
+    });
+
+
+// 判断修改的时候，账号名是否重复
+    $("#updateusername").blur(function () {//input框失去焦点判断
+        var updateusername = $("#updateusername").val();
+        if (updateusername !=null&&updateusername!=oldusername) {
+            $.ajax({
+                type: 'post',
+                data: {key: "username", value: updateusername},
+                url: '/selectoneuser',
+                dataType: 'json',
+                success: function (data) {
+                    //alert(JSON.stringify(data));
+                    // data.length判断数组长度
+                    if (data.length!=0) {
+                        alert("账号重复，请重新输入！，该账号是："+oldusername);
+                    }
+                },
+                error:function (e) {
+                    alert("错误！");
+                }
+            });
+        }
+    });
+
+    $.extend($.fn.bootstrapTable.Defaults, $.fn.bootstrapTable.locales['zh-CN']);
+
+
+</script>
+
+</html>

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.booksystem.mapper.Mapperselect">
+
+<!--查询所有书籍-->
+    <select id="selectallbook" resultType="com.example.booksystem.model.Book">
+        select * from book
+    </select>
+
+    <!--查询所有用户-->
+    <select id="selectalluser" resultType="com.example.booksystem.model.User">
+        select * from user
+    </select>
+
+    <!--查询所有借阅-->
+    <select id="selectallborrow" resultType="com.example.booksystem.model.Borrow">
+        select * from borrow
+    </select>
+
+    <!--按条件查询一个书籍信息-->
+    <select id="selectonebook" parameterType="HashMap" resultType="com.example.booksystem.model.Book">
+        select * from book
+        <where>
+            <if test="bookid!=null and bookid!=''">
+                and bookid like '${bookid}'
+            </if>
+            <if test="bookname!=null and bookname!=''">
+                and bookname like '%${bookname}%'
+            </if>
+            <if test="quantity!=null and quantity!=''">
+                and quantity like '${quantity}%'
+            </if>
+            <if test="place!=null and place!=''">
+                and place like '%${place}%'
+            </if>
+            <if test="isborrow!=null and isborrow!=''">
+                and isborrow=#{isborrow}
+            </if>
+            <if test="remark!=null and remark!=''">
+                and remark like '%${remark}%'
+            </if>
+        </where>
+    </select>
+
+<!--按条件查询一个用户信息-->
+    <select id="selectoneuser" parameterType="HashMap" resultType="com.example.booksystem.model.User">
+        select * from user
+        <where>
+            <if test="id!=null and id!=''">
+                and id like '${id}'
+            </if>
+            <if test="username!=null and username!=''">
+                and username like '${username}'
+            </if>
+            <if test="password!=null and password!=''">
+                and password=#{password}
+            </if>
+            <if test="name!=null and name!=''">
+                and name like '%${name}%'
+            </if>
+            <if test="userclass!=null and userclass!=''">
+                and userclass like '${userclass}%'
+            </if>
+            <if test="gender!=null and gender!=''">
+                and gender=#{gender}
+            </if>
+            <if test="telephone!=null and telephone!=''">
+                and telephone like '${telephone}%'
+            </if>
+            <if test="department!=null and department!=''">
+                and department like '%${department}%'
+            </if>
+            <if test="jurisdiction!=null and jurisdiction!=''">
+                and jurisdiction=#{jurisdiction}
+            </if>
+            <if test="email!=null and email!=''">
+                and email=#{email}
+            </if>
+        </where>
+    </select>
+
+    <!--按条件查询一个借阅信息-->
+    <select id="selectoneborrow" parameterType="HashMap" resultType="com.example.booksystem.model.Borrow">
+        select *from borrow
+        <where>
+            <if test="borrowid!=null and borrowid!=''">
+                and borrowid like '${borrowid}'
+            </if>
+            <if test="bookid!=null and bookid!=''">
+                and bookid like '${bookid}%'
+            </if>
+            <if test="id!=null and id!=''">
+                and id like '${id}%'
+            </if>
+            <if test="borrowtime!=null and borrowtime!=''">
+                and borrowtime like '${borrowtime}%'
+            </if>
+            <if test="returntime!=null and returntime!=''">
+                and returntime like '${returntime}%'
+            </if>
+        </where>
+    </select>
+
+<!--    一对一查询借阅信息-->
+    <select id="selectmore" parameterType="HashMap" resultMap="selectmap1">
+        select * from user,borrow,book
+        <where>
+            user.id=borrow.id and borrow.bookid=book.bookid
+            <if test="borrowid!=null and borrowid!=''">
+                and borrowid=#{borrowid}
+            </if>
+            <if test="bookid!=null and bookid!=''">
+                and borrow.bookid=#{bookid}
+            </if>
+            <if test="id!=null and id!=''">
+                and borrow.id =#{id}
+            </if>
+            <if test="borrowtime!=null and borrowtime!=''">
+                and borrowtime like '${borrowtime}%'
+            </if>
+            <if test="returntime!=null and returntime!=''">
+                and returntime like '${returntime}%'
+            </if>
+        </where>
+    </select>
+    <resultMap id="selectmap1" type="com.example.booksystem.model.Borrow">
+        <id property="borrowid" column="borrowid"></id>
+        <result property="bookid" column="bookid"></result>
+        <result property="id" column="id"></result>
+        <result property="borrowtime" column="borrowtime"></result>
+        <result property="returntime" column="returntime"></result>
+<!--        配置user的映射-->
+        <association property="user" javaType="com.example.booksystem.model.User">
+            <id property="id" column="id"></id>
+            <result property="name" column="name"></result>
+            <result property="userclass" column="userclass"></result>
+            <result property="gender" column="gender"></result>
+            <result property="department" column="department"></result>
+        </association>
+<!--        配置Book的映射-->
+        <association property="book" javaType="com.example.booksystem.model.Book">
+            <id property="bookid" column="bookid"></id>
+            <result property="bookname" column="bookname"></result>
+            <result property="quantity" column="quantity"></result>
+            <result property="place" column="place"></result>
+            <result property="isborrow" column="isborrow"></result>
+            <result property="remark" column="remark"></result>
+        </association>
+    </resultMap>
+
+<!--模糊查询所有借阅信息-->
+    <select id="selectmorefuzzy" parameterType="String" resultMap="selectmap1">
+        select * from user,borrow,book where user.id=borrow.id and borrow.bookid=book.bookid and
+            concat (
+            borrowid,borrow.id,user.id,user.name,user.userclass,user.gender,user.department,
+            book.bookname,book.quantity,book.place,book.isborrow,book.remark,
+            borrow.borrowtime,borrow.returntime) like '%${value}%';
+    </select>
+
+
+    <select id="selectuserfuzzy" parameterType="String" resultType="com.example.booksystem.model.User">
+        select * from user where concat(id,name,userclass,gender,telephone,department,jurisdiction) like '%${value}%';
+    </select>
+
+    <select id="selectbookfuzzy" parameterType="String" resultType="com.example.booksystem.model.Book">
+        select * from book where concat(bookid,bookname,quantity,place,isborrow,remark) like '%${value}%';
+    </select>
+
+
+</mapper>

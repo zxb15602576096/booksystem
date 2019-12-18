@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.booksystem.mapper.Mapperinsert">
+
+<!--    插入一个用户-->
+    <insert id="insertuser" parameterType="com.example.booksystem.model.User">
+        insert into user (id,username,password,name,userclass,gender,telephone,department,jurisdiction,email)
+            values
+                (
+                    #{user.id},#{user.username},#{user.password},#{user.name},#{user.userclass},#{user.gender},
+                    #{user.telephone},#{user.department},#{user.jurisdiction},#{user.email}
+                )
+    </insert>
+
+    <insert id="insertbook" parameterType="com.example.booksystem.model.Book">
+        insert into book (bookid,bookname,quantity,place,isborrow,remark)
+        values
+        (
+            #{book.bookid},#{book.bookname},#{book.quantity},#{book.place},#{book.isborrow},#{book.remark}
+        )
+    </insert>
+
+    <insert id="insertborrow" parameterType="com.example.booksystem.model.Borrow">
+        insert into borrow (bookid,id,borrowtime,returntime)
+        values
+        (
+           #{borrow.bookid},#{borrow.id},#{borrow.borrowtime},#{borrow.returntime}
+        )
+    </insert>
+
+</mapper>

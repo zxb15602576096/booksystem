@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
+    <title>借阅信息</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
+<script src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table-locale-all.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/export/bootstrap-table-export.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            type:'post',
+            url:'/selectalluser',
+            dataType:'json',
+            success:function (data) {
+                var options="";
+                for (var i=0;i<data.length;i++)
+                {
+                    options+="<option value='"+data[i].id+"'>"+"id："+data[i].id+"&nbsp;&nbsp;"+"名字："+data[i].name+"</option>";
+                }
+                $('#selectuser').append(options);
+                $('#selectuser').selectpicker('refresh');
+                $('#selectuser').selectpicker('render');
+            },
+            error:function () {
+            }
+        });
+
+        $.ajax({
+            type:'post',
+            url:'/selectallbook',
+            dataType:'json',
+            success:function (data) {
+                var options="";
+                for (var i=0;i<data.length;i++)
+                {
+                    if (data[i].isborrow!="不可借阅"&&data[i].quantity!=0)
+                        options+="<option value='"+data[i].bookid+"'>"+"书籍id："+data[i].bookid+"&nbsp;&nbsp;"+"书名："+data[i].bookname+"</option>";
+                }
+                $('#selectbook').append(options);
+                $('#selectbook').selectpicker('refresh');
+                $('#selectbook').selectpicker('render');
+            },
+            error:function () {
+            }
+        });
+        var date=new Date();
+        var year=date.getFullYear();
+        var month=date.getMonth()+1;
+        var day=date.getDate();
+        $("#borrowtime").val(year+"/"+month+"/"+day);
+
+        var date2=new Date();
+        date2.setMonth(date2.getMonth()+4);
+        var year2=date2.getFullYear();
+        var month2=date2.getMonth();
+        var day2=date2.getDate();
+        $("#returntime").val(year2+"/"+month2+"/"+day2);
+    })
+</script>
+<body>
+<div>
+    <button id="remove" class="btn btn-danger" disabled>
+        <i class="glyphicon glyphicon-remove"></i> 删除
+    </button>
+    <button  class="btn btn-success" data-toggle="modal" data-target="#myModal">
+        <i class="glyphicon glyphicon-inbox"></i> 添加
+    </button>
+    <table
+            id="table"
+            data-toolbar="#toolbar"
+            data-search="true"
+            data-show-refresh="true"
+            data-show-toggle="true"
+            data-show-fullscreen="false"
+            data-show-columns="true"
+            data-show-columns-toggle-all="true"
+            data-detail-view="false"
+            data-show-export="true"
+            data-click-to-select="false"
+            data-detail-formatter="detailFormatter"
+            data-minimum-count-columns="2"
+            data-show-pagination-switch="false"
+            data-pagination="false"
+            data-id-field="borrowid"
+            data-page-list="[10, 20,all]"
+            data-show-footer="false"
+            data-side-pagination="server"
+            data-url="/selectmore"
+            data-toggle="table" data-locale="zh-CN"
+            data-response-handler="responseHandler">
+    </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">添加借阅信息</h4>
+            </div>
+            <div class="input-group input-group-lg" style="padding-top: 10px">
+                <span class="input-group-addon">用户</span>
+                <select id="selectuser" class="selectpicker form-control">
+                    <option>请选择用户：</option>
+                </select>
+            </div>
+            <div class="input-group input-group-lg" style="padding-top: 10px">
+                <span class="input-group-addon">书籍</span>
+                <select id="selectbook" class="selectpicker form-control">
+                    <option>请选择书籍：</option>
+                </select>
+            </div>
+            <div class="input-group input-group-lg" style="padding-top: 10px">
+                <span class="input-group-addon" id="sizing-addon1-1">借书时间</span>
+                <input type="text" id="borrowtime" class="form-control" placeholder="借书时间" aria-describedby="sizing-addon1-1" required>
+            </div>
+            <div class="input-group input-group-lg" style="padding-top: 10px">
+                <span class="input-group-addon" id="sizing-addon1-2">还书时间</span>
+                <input type="text" id="returntime" class="form-control" placeholder="还书时间" aria-describedby="sizing-addon1-1" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="insert" type="button" class="btn btn-primary" data-dismiss="modal" >添加</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--修改的框-->
+<div class="modal fade" id="myModa2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabe2">修改借阅信息</h4>
+            </div>
+            <div class="modal-body">
+                <!--                借阅id修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-1">借阅id</span>
+                    <input type="text" id="updateborrowid" class="form-control" placeholder="请输入借阅id" aria-describedby="sizing-addon2-1" required>
+                </div>
+                <!--                用户id修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-2">用户id</span>
+                    <input type="text" id="updateuserid" class="form-control" placeholder="请输入用户id" aria-describedby="sizing-addon2-2" required>
+                </div>
+                <!--                姓名修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-3">姓名</span>
+                    <input type="text" id="updatename" class="form-control" placeholder="请输入书姓名" aria-describedby="sizing-addon2-3" required>
+                </div>
+                <!--            班级修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-4">班级</span>
+                    <input type="text" id="updateuserclass" class="form-control" placeholder="请输入班级" aria-describedby="sizing-addon2-4">
+                </div>
+                <!--                性别修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-5">性别</span>
+<!--                    <input type="text" id="updategender" class="form-control" placeholder="请输入性别" aria-describedby="sizing-addon2-5" required>-->
+                    <select id="updategender" class="selectpicker form-control">
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <!--                系别修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-6">系别</span>
+                    <input type="text" id="updatedepartment" class="form-control" placeholder="请输入系别" aria-describedby="sizing-addon2-6" required>
+                </div>
+                <!--                书籍id修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-7">书籍id</span>
+                    <input type="text" id="updatebookid" class="form-control" placeholder="请输入书籍id" aria-describedby="sizing-addon2-7" required>
+                </div>
+                <!--                书名修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-8">书名</span>
+                    <input type="text" id="updatebookname" class="form-control" placeholder="请输入书名" aria-describedby="sizing-addon2-8" required>
+                </div>
+                <!--                库存修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-9">库存</span>
+                    <input type="text" id="updatequantity" class="form-control" placeholder="请输入书名" aria-describedby="sizing-addon2-9" required>
+                </div>
+                <!--                存放地点修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-10">存放地点</span>
+                    <input type="text" id="updateplace" class="form-control" placeholder="请输入存放地点" aria-describedby="sizing-addon2-10" required>
+                </div>
+            <!--                是否可借阅修改-->
+<!--                <div class="input-group input-group-lg" style="padding-top: 10px">-->
+<!--                    <span class="input-group-addon" id="sizing-addon2-11">是否可借阅</span>-->
+<!--&lt;!&ndash;                    <input type="text" id="updateisborrow" class="form-control" placeholder="请输入是否可借阅" aria-describedby="sizing-addon2-11" required>&ndash;&gt;-->
+<!--                    <select id="updateisborrow" class="selectpicker form-control">-->
+<!--                        <option value="可借阅">可借阅</option>-->
+<!--                        <option value="不可借阅">不可借阅</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+                <!--                备注修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-12">备注</span>
+                    <input type="text" id="updateremark" class="form-control" placeholder="请输入备注" aria-describedby="sizing-addon2-12" required>
+                </div>
+                <!--                借阅时间修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-13">借阅时间</span>
+                    <input type="text" id="updateborrowtime" class="form-control" placeholder="请输入借阅时间" aria-describedby="sizing-addon2-13" required>
+                </div>
+                <!--                还书时间修改-->
+                <div class="input-group input-group-lg" style="padding-top: 10px">
+                    <span class="input-group-addon" id="sizing-addon2-14">还书时间</span>
+                    <input type="text" id="updatereturntime" class="form-control" placeholder="请输入还书时间" aria-describedby="sizing-addon2-14" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="update" type="button" class="btn btn-primary" data-dismiss="modal" >修改</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script>
+    //元素选择
+    var $table = $('#table')//表格
+    var $remove = $('#remove')//删除按钮
+    var $insert = $('#insert')//添加按钮
+    var $update = $('#update')//修改按钮
+    var selections = []//节点
+
+    //获取节点id
+    function getIdSelections() {
+        return $.map($table.bootstrapTable('getSelections'), function (row) {
+            return row.borrowid
+        })
+    }
+
+    function responseHandler(res) {
+        $.each(res.rows, function (i, row) {
+            row.state = $.inArray(row.borrowid, selections) !== -1
+        })
+        return res
+    }
+
+    function detailFormatter(index, row) {
+        var html = []
+        $.each(row, function (key, value) {
+            html.push('<p><b>' + key + ':</b> ' + value + '</p>')
+        })
+        return html.join('')
+    }
+
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a class="like" href="javascript:void(0)" title="Like">',
+            '<i class="fa fa-heart"></i>',
+            '</a>  ',
+            '<a class="remove" href="javascript:void(0)" title="Remove">',
+            '<i class="fa fa-trash"></i>',
+            '</a>'
+        ].join('')
+    }
+
+    window.operateEvents = {
+        'click .like': function (e, value, row, index) {
+            alert('You click like action, row: ' + JSON.stringify(row))
+        },
+        'click .remove': function (e, value, row, index) {
+            $table.bootstrapTable('remove', {
+                field: 'borrowid',
+                values: [row.borrowid]
+            })
+        }
+    }
+
+    function totalTextFormatter(data) {
+        return 'Total'
+    }
+
+    function totalNameFormatter(data) {
+        return data.length
+    }
+
+    function totalPriceFormatter(data) {
+        var field = this.field
+        return '$' + data.map(function (row) {
+            return +row[field].substring(1)
+        }).reduce(function (sum, i) {
+            return sum + i
+        }, 0)
+    }
+
+    //初始化表格
+    function initTable() {
+
+        $table.bootstrapTable('destroy').bootstrapTable({
+            height: 550,
+            locale: $('#locale').val(),
+            columns: [
+                [{
+                    field: 'state',
+                    checkbox: true,
+                    rowspan: 2,
+                    align: 'center',
+                    valign: 'middle'
+                },{
+                    title: '书籍借阅信息',
+                    colspan: 13,
+                    align: 'center'
+                }],
+                [ {
+                    title: '借阅id',
+                    field: 'borrowid'
+                },{
+                    title: '用户id',
+                    field: 'id'
+                },  {
+                    field: 'user.name',
+                    title: '姓名'
+                }, {
+                    field: 'user.userclass',
+                    title: '班级'
+                }, {
+                    field: 'user.gender',
+                    title: '性别'
+                },{
+                    field: 'user.department',
+                    title: '院系'
+                },{
+                    title: '书籍id',
+                    field: 'bookid'
+                },  {
+                    field: 'book.bookname',
+                    title: '书名'
+                }, {
+                    field: 'book.quantity',
+                    title: '库存'
+                }, {
+                    field: 'book.place',
+                    title: '存放地点'
+                }, {
+                    field: 'book.remark',
+                    title: '备注'
+                }, {
+                    field: 'borrowtime',
+                    title: '借书时间'
+                }, {
+                    field: 'returntime',
+                    title: '还书时间'
+                }]
+            ]
+        });
+        $table.on('check.bs.table uncheck.bs.table ' +
+            'check-all.bs.table uncheck-all.bs.table',
+            function () {
+                $remove.prop('disabled', !$table.bootstrapTable('getSelections').length);
+
+                // save your data, here just save the current page
+                selections = getIdSelections()
+                // push or splice the selections if you want to save all data selections
+            });
+        $table.on('all.bs.table', function (e, name, args) {
+            console.log(name, args)
+        });
+        //点击行元素产生的事件
+        $table.on('click-row.bs.table',function (row, $element, field) {
+            console.log(row, $element, field);
+        });
+        //点击删除按钮的操作
+        $remove.click(function () {
+            var borrowids = getIdSelections()
+            $table.bootstrapTable('remove', {
+                field: 'borrowid',
+                values: borrowids
+            });
+            $remove.prop('disabled', true);
+            var borrow_ids=[];
+            for (var i=0;i<borrowids.length;i++)
+            {
+                borrow_ids[i]=borrowids[i];
+            }
+            $.ajax({
+                type:'post',
+                data:"borrowids="+borrow_ids,      //传递list数组
+                url:'/deleteborrowbyborrowid',
+                success:function () {},
+                error:function () {}
+            });
+        });
+        //点击添加按钮操作
+        $insert.click(function () {
+            var id=$("#selectuser").val();
+            var bookid=$("#selectbook").val();
+            var borrowtime=$("#borrowtime").val();
+            var returntime=$("#returntime").val();
+            var remark=$("#remark").val();
+            if (id==null||bookid==null||borrowtime==null||returntime==null){
+                alert("输入内容不完整！");
+            }
+            else {
+                $.ajax({
+                    type:'post',
+                    data:{borrowid:0,bookid:bookid,id:id,borrowtime:borrowtime,returntime:returntime},
+                    url:'/insertborrow',
+                    dataType:'json',
+                    success:function () {}
+                });
+            }
+        });
+        $update.click(function () {
+            var borrowid=$("#updateborrowid").val();
+            var userid=$("#updateuserid").val();
+            var name=$("#updatename").val();
+            var userclass=$("#updateuserclass").val();
+            var gender=$("#updategender").val();
+            var department=$("#updatedepartment").val();
+            var bookid=$("#updatebookid").val();
+            var bookname=$("#updatebookname").val();
+            var quantity=$("#updatequantity").val();
+            var place=$("#updateplace").val();
+            var remark=$("#updateremark").val();
+            var borrowtime=$("#updateborrowtime").val();
+            var returntime=$("#updatereturntime").val();
+            if (borrowid==null||userid==null||name==null||userclass==null||gender==null||department==null||bookid==null||bookname==null||quantity==null||place==null||remark==null||borrowtime==null||returntime==null){
+                alert("输入内容不完整！");
+            }
+            else {
+                $.ajax({
+                    type:'post',
+                    data:{borrowid:borrowid,bookid:bookid,id:userid,borrowtime:borrowtime,returntime:returntime,"user.name":name,"user.userclass":userclass,"user.gender":gender,"user.department":department,"book.bookname":bookname,"book.quantity":quantity,"book.place":place,"book.remark":remark},
+                    url:'/updateborrow',
+                    dataType:'json',
+                    success:function () {}
+                });
+            }
+        });
+    }
+
+
+    var oldborrowid=null;
+    //双击单行修改操作
+    $("#table").on("dblclick", "tr", function () {
+        var td = $(this).find("td");
+        //声明并取到当前行值
+        $("#updateborrowid").val(td.eq(1).text());
+        $("#updateuserid").val(td.eq(2).text());
+        $("#updatename").val(td.eq(3).text());
+        $("#updateuserclass").val(td.eq(4).text());
+        $("#updategender").val(td.eq(5).text());
+        $("#updatedepartment").val(td.eq(6).text());
+        $("#updatebookid").val(td.eq(7).text());
+        $("#updatebookname").val(td.eq(8).text());
+        $("#updatequantity").val(td.eq(9).text());
+        $("#updateplace").val(td.eq(10).text());
+        $("#updateremark").val(td.eq(11).text());
+        $("#updateborrowtime").val(td.eq(12).text());
+        $("#updatereturntime").val(td.eq(13).text());
+        oldborrowid=$("#updateborrowid").val();
+        //触发修改的模态框
+        $('#myModa2').modal();
+    });
+
+
+    // 判断修改的时候，账号名是否重复
+    $("#updateborrowid").blur(function () {//input框失去焦点判断
+        var updateborrowid = $("#updateborrowid").val();
+        if (updateborrowid !=null&&updateborrowid!=oldborrowid) {
+            $.ajax({
+                type: 'post',
+                data: {key: "borrowid", value: updateborrowid},
+                url: '/selectoneborrow',
+                dataType: 'json',
+                success: function (data) {
+                    //alert(JSON.stringify(data));
+                    // data.length判断数组长度
+                    if (data.length!=0) {
+                        alert("借阅id重复，请重新输入！，该借阅id是："+oldborrowid);
+                    }
+                },
+                error:function (e) {
+                }
+            });
+        }
+    });
+
+
+    $(function() {
+        initTable()
+
+        $('#locale').change(initTable)
+    })
+
+    $.extend($.fn.bootstrapTable.Defaults, $.fn.bootstrapTable.locales['zh-CN']);
+
+</script>
+
+</html>

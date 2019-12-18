@@ -1,0 +1,7 @@
+body {
+    font-family:Verdana;
+
+    background: url(../images/banner.jpg)no-repeat center 0px;
+    background-attachment: fixed;
+    background-size: cover;
+}

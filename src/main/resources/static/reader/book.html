@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css">
+    <title>书籍信息</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
+<script src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table-locale-all.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/export/bootstrap-table-export.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var id = sessionStorage.getItem('username');  //获取session中的username，用户id
+        $.ajax({
+            type:'post',
+            url:'/selectoneuser?key=id&value='+id,
+            dataType:'json',
+            success:function (data) {
+                var options="";
+                for (var i=0;i<data.length;i++)
+                {
+                    options+="<option value='"+data[i].id+"'>"+"id："+data[i].id+"&nbsp;&nbsp;"+"名字："+data[i].name+"</option>";
+                }
+                $('#selectuser').append(options);
+                $('#selectuser').selectpicker('refresh');
+                $('#selectuser').selectpicker('render');
+            },
+            error:function () {
+            }
+        });
+
+        var date=new Date();
+        var year=date.getFullYear();
+        var month=date.getMonth()+1;
+        var day=date.getDate();
+        $("#borrowtime").val(year+"/"+month+"/"+day);
+
+        var date2=new Date();
+        date2.setMonth(date2.getMonth()+4);
+        var year2=date2.getFullYear();
+        var month2=date2.getMonth();
+        var day2=date2.getDate();
+        $("#returntime").val(year2+"/"+month2+"/"+day2);
+    })
+</script>
+<body>
+<div>
+    <button id="borrow" class="btn btn-success" >
+        <i class="glyphicon glyphicon-inbox"></i> 借阅
+    </button>
+    <table
+            id="table"
+            data-toolbar="#toolbar"
+            data-search="true"
+            data-show-refresh="true"
+            data-show-toggle="true"
+            data-show-fullscreen="false"
+            data-show-columns="true"
+            data-show-columns-toggle-all="true"
+            data-detail-view="false"
+            data-show-export="true"
+            data-click-to-select="false"
+            data-detail-formatter="detailFormatter"
+            data-minimum-count-columns="2"
+            data-show-pagination-switch="false"
+            data-pagination="false"
+            data-id-field="bookid"
+            data-page-list="[10, 20,all]"
+            data-show-footer="false"
+            data-side-pagination="server"
+            data-url="/selectallbook"
+            data-toggle="table" data-locale="zh-CN"
+            data-response-handler="responseHandler">
+    </table>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">添加借阅信息</h4>
+            </div>
+            <div class="input-group input-group-lg" style="padding-top: 10px">
+                <span class="input-group-addon">用户</span>
+                <select id="selectuser" class="selectpicker form-control">
+                </select>
+            </div>
+            <span id="selectbookid"></span>
+
+            <div class="input-group input-group-lg" style="padding-top: 10px">
+                <span class="input-group-addon" id="sizing-addon1-20">借书时间</span>
+                <input type="text" id="borrowtime" disabled class="form-control" placeholder="借书时间" aria-describedby="sizing-addon1-20" required>
+            </div>
+            <div class="input-group input-group-lg" style="padding-top: 10px">
+                <span class="input-group-addon" id="sizing-addon1-21">还书时间</span>
+                <input type="text" id="returntime" disabled class="form-control" placeholder="还书时间" aria-describedby="sizing-addon1-21" required>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="insert" type="button" class="btn btn-primary" data-dismiss="modal" >借阅</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script>
+    //元素选择
+    var $table = $('#table');//表格
+    var selections = [];//书籍id
+    var selectionsbookname = [];//书名
+    var selectionsquantity = [];//库存
+    var selectionsisborrow = [];//是否可借阅
+
+
+    //获取节点id
+    function getIdSelections() {
+        return $.map($table.bootstrapTable('getSelections'), function (row) {
+            return row.bookid   //获得所选的bookid
+        })
+    }
+
+    //获取bookname
+    function getIdSelectionsbookname() {
+        return $.map($table.bootstrapTable('getSelections'), function (row) {
+            return row.bookname   //获得所选的bookname
+        })
+    }
+
+    //获取bookname
+    function getIdSelectionsquantity() {
+        return $.map($table.bootstrapTable('getSelections'), function (row) {
+            return row.quantity   //获得所选的bookname
+        })
+    }
+
+    //获取bookname
+    function getIdSelectionsisborrow() {
+        return $.map($table.bootstrapTable('getSelections'), function (row) {
+            return row.isborrow   //获得所选的bookname
+        })
+    }
+
+
+    function responseHandler(res) {
+        $.each(res.rows, function (i, row) {
+            row.state = $.inArray(row.bookid, selections) !== -1
+        });
+        return res
+    }
+
+    function detailFormatter(index, row) {
+        var html = []
+        $.each(row, function (key, value) {
+            html.push('<p><b>' + key + ':</b> ' + value + '</p>')
+        })
+        return html.join('')
+    }
+
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a class="like" href="javascript:void(0)" title="Like">',
+            '<i class="fa fa-heart"></i>',
+            '</a>  ',
+            '<a class="remove" href="javascript:void(0)" title="Remove">',
+            '<i class="fa fa-trash"></i>',
+            '</a>'
+        ].join('')
+    }
+
+    window.operateEvents = {
+        'click .like': function (e, value, row, index) {
+            alert('You click like action, row: ' + JSON.stringify(row))
+        },
+        'click .remove': function (e, value, row, index) {
+            $table.bootstrapTable('remove', {
+                field: 'bookid',
+                values: [row.bookid]
+            })
+        }
+    }
+
+    function totalTextFormatter(data) {
+        return 'Total'
+    }
+
+    function totalNameFormatter(data) {
+        return data.length
+    }
+
+    function totalPriceFormatter(data) {
+        var field = this.field
+        return '$' + data.map(function (row) {
+            return +row[field].substring(1)
+        }).reduce(function (sum, i) {
+            return sum + i
+        }, 0)
+    }
+
+    //初始化表格
+    function initTable() {
+
+        $table.bootstrapTable('destroy').bootstrapTable({
+            height: 550,
+            locale: $('#locale').val(),
+            columns: [
+                [{
+                    field: 'state',
+                    checkbox: true,
+                    rowspan: 2,
+                    align: 'center',
+                    valign: 'middle'
+                }, {
+                    title: '书籍信息',
+                    colspan: 6,
+                    align: 'center'
+                }],
+                [{
+                    title: '书籍id',
+                    field: 'bookid'
+                },{
+                    field: 'bookname',
+                    title: '书名'
+                }, {
+                    field: 'quantity',
+                    title: '库存'
+                }, {
+                    field: 'place',
+                    title: '存放地点'
+                }, {
+                    field: 'isborrow',
+                    title: '是否可借阅'
+                }, {
+                    field: 'remark',
+                    title: '备注'
+                }]
+            ]
+        });
+        $table.on('check.bs.table uncheck.bs.table ' +
+            'check-all.bs.table uncheck-all.bs.table',
+            function () {
+                selections = getIdSelections();   //获取复选框所选的书籍id
+                selectionsbookname=getIdSelectionsbookname();  //获取复选框所选的bookname
+                selectionsquantity=getIdSelectionsquantity();  //获取复选框所选的quantity
+                selectionsisborrow=getIdSelectionsisborrow();  //获取复选框所选的isborrow
+            });
+        $table.on('all.bs.table', function (e, name, args) {
+            console.log(name, args)
+        });
+        //点击行元素产生的事件
+        $table.on('click-row.bs.table',function (row, $element, field) {
+            console.log(row, $element, field);
+        })
+    }
+    $(function() {
+        initTable()
+
+        $('#locale').change(initTable)
+    });
+
+    $("#borrow").click(function () {
+        var isdo=true;
+        for(var i=0;i<selections.length;i++)
+        {
+            if (selectionsquantity[i]==0){
+                alert("书籍id："+selections[i]+"     书名："+selectionsbookname[i]+"    该书库存为0，不可借阅！");
+                isdo=false;
+            }
+            else if (selectionsisborrow[i]=="不可借阅"){
+                alert("书籍id："+selections[i]+"     书名："+selectionsbookname[i]+"    该书不可借阅！");
+                isdo=false;
+            }
+        }
+        if (isdo==true)
+        {
+            $("#selectbookid").empty();   //清空input框
+            for(var i=0;i<selections.length;i++)
+            {
+                //alert(selections[i]);
+                $("#selectbookid").append("<div class='input-group input-group-lg ' style='padding-top: 10px'> " +
+                    "<span class='input-group-addon'>书籍</span>" +
+                    "<input type='text' id='bookid"+i+"' disabled class='form-control' placeholder='书籍' aria-describedby='sizing-addon1-1' required>" +
+                    "</div>");
+                $("#bookid"+i).val("书籍id："+selections[i]+"         书名："+selectionsbookname[i]);   //获取
+            }
+            //触发修改的模态框
+            $('#myModal').modal();
+        }
+    });
+
+
+    $("#insert").click(function () {
+            var id=$("#selectuser").val();
+            var borrowtime=$("#borrowtime").val();
+            var returntime=$("#returntime").val();
+            for (var i = 0; i < selections.length; i++) {
+                var bookid=selections[i];  //获取bookid
+                $.ajax({
+                    type: 'post',
+                    data: {borrowid: 0, bookid: bookid, id: id, borrowtime: borrowtime, returntime: returntime},
+                    url: '/insertborrow',
+                    dataType: 'json',
+                    success: function () {
+                    }
+                });
+            }
+        initTable();
+    });
+
+
+    $.extend($.fn.bootstrapTable.Defaults, $.fn.bootstrapTable.locales['zh-CN']);
+
+</script>
+
+</html>

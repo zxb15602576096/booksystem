@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+<!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/css/bootstrap-select.min.css">-->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.css">
+    <title>超级管理员</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>-->
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/bootstrap-table-locale-all.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.15.5/dist/extensions/export/bootstrap-table-export.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var username = sessionStorage.getItem('username');  //获取session中的username
+        if (username==null){window.location.href="../index.html";}     //判断是否登录
+        else {           //防止权限越界
+            $.ajax({
+                type:'post',
+                url:'/selectoneuser',
+                data:{key:"username",value:username},
+                dataType:'json',
+                success:function (data) {
+                    if (data[0].jurisdiction==1){}
+                    else {window.location.href="../index.html";}
+                },
+                error:function () {
+                }
+            });
+        }
+        $("#exitlogin").click(function () {
+            // 上一级要加多一个.
+            window.location.href="../index.html";
+        });
+    });
+</script>
+<body>
+<div>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#user" aria-controls="user" role="tab" data-toggle="tab">个人信息</a></li>
+        <li role="presentation"><a href="#book" aria-controls="book" role="tab" data-toggle="tab">书籍信息</a></li>
+        <li role="presentation"><a href="#borrow" aria-controls="borrow" role="tab" data-toggle="tab">借阅信息</a></li>
+        <li role="presentation"><a id="exitlogin" role="tab" data-toggle="tab">退出登录</a></li>
+    </ul>
+</div>
+
+<!-- Tab panes -->
+<div class="tab-content">
+    <div role="user" class="tab-pane active container-fluid" id="user">
+        <div class="row">
+<!--            固高，不能自动-->
+            <object data="user.html" id="userObject"  class="col-md-12"></object>
+        </div>
+    </div>
+    <div role="book" class="tab-pane container-fluid" id="book">
+        <div class="row">
+            <object data="book.html" id="bookObject"  class="col-md-12 "></object>
+        </div>
+    </div>
+    <div role="borrow" class="tab-pane container-fluid" id="borrow">
+        <div class="row">
+            <object data="borrow.html" id="borrowObject"  class="col-md-12  "></object>
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+    var a = $(window).height();
+    var b = Number(a-42);
+    $("#userObject").attr("height",b);
+    $("#bookObject").attr("height",b);
+    $("#borrowObject").attr("height",b);
+</script>
+</html>
